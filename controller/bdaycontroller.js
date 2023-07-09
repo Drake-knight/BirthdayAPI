@@ -131,7 +131,7 @@ module.exports = function(app){
      res.json({error: 'No closest birthday found'});
     }
     else{
-     res.json(closestbday);
+     res.json({name:closestbday.name,birthday:closestbday.birthday});
     }
  
     }
