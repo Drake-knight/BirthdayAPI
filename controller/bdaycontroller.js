@@ -103,6 +103,41 @@ module.exports = function(app){
     });
  
     // closest birthday
+     app.get('/birthday/nearest',async function(req,res){
+     try{
+        
+    var today = moment.utc().startOf('day');
+   
+ 
+    var allbday = await BirthDay.find();
+   
     
+    var closestbday = null;
+    var mindiff = Infinity;
+ 
+    allbday.forEach(function(bday){
+     var momcon  = moment(bday.birthday) ;
+     var setbday = momcon.set('year', today.year());
+     console.log(setbday);
+     var abdiff = Math.abs(setbday.diff(today));
+ 
+     if(abdiff<mindiff){
+       mindiff = abdiff;
+       closestbday = bday;
+     }
+    });
+ 
+    if(!closestbday){
+     res.json({error: 'No closest birthday found'});
+    }
+    else{
+     res.json(closestbday);
+    }
+ 
+    }
+    catch(err){
+     res.json({error: 'Could not fetch birthday'});
+    }
+    });
  
     };
