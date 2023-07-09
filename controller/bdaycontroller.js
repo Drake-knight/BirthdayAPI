@@ -1,4 +1,3 @@
-var moment = require('moment');
 var bodyparser = require('body-parser');
 var mongoose = require('mongoose');
 
@@ -24,9 +23,10 @@ module.exports = function(app){
     app.post('/add', urlencodeparser, async function(req, res){
     try{ 
      var P = req.body.name;
+     var birthday = req.body.birthday;
+     var Q = new Date(birthday);
      
-     var Q = moment.utc(req.body.birthday, 'DD-MM-YYYY');
-     if(!P || !Q.isValid()) {
+     if(!P || isNaN(Q)) {
        res.json({error:'Name or Birthday is not valid'});
      }
       else{
@@ -35,7 +35,7 @@ module.exports = function(app){
          if(existingPerson){
           res.json({error:'Person already exists'});
          }else{
-       var AddBday = new BirthDay({name:P,birthday:Q.toDate()});
+       var AddBday = new BirthDay({name:P,birthday:Q});
    
        AddBday.save();
        res.json({message:'Birthday Added'});
@@ -88,9 +88,10 @@ module.exports = function(app){
     app.put('/person/update/:name', urlencodeparser, async function(req, res){
     try {
      var name = req.params.name;
-     var newBday = moment.utc(req.body.birthday, 'DD-MM-YYYY');
+     var newBdayStr = req.body.birthday;
+     var newbirthday = new Date(newBdayStr);
  
-     var updatedBday = await BirthDay.findOneAndUpdate({name:name},{birthday:newBday.toDate()},{new:true});
+     var updatedBday = await BirthDay.findOneAndUpdate({name:name},{birthday:newbirthday},{new:true});
      if (!updatedBday) {
        res.json({error:'Person not found'});
      }
@@ -106,7 +107,8 @@ module.exports = function(app){
      app.get('/birthday/nearest',async function(req,res){
      try{
         
-    var today = moment.utc().startOf('day');
+    var today = new Date();
+    today.setUTCHours(0,0,0,0);
    
  
     var allbday = await BirthDay.find();
@@ -116,10 +118,11 @@ module.exports = function(app){
     var mindiff = Infinity;
  
     allbday.forEach(function(bday){
-     var momcon  = moment(bday.birthday) ;
-     var setbday = momcon.set('year', today.year());
-     console.log(setbday);
-     var abdiff = Math.abs(setbday.diff(today));
+     var cbday = new Date(bday.birthday);
+     cbday.setFullYear(today.getFullYear());
+    
+     var abdiff = Math.abs(today - cbday);
+
  
      if(abdiff<mindiff){
        mindiff = abdiff;
