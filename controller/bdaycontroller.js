@@ -85,7 +85,7 @@ module.exports = function(app){
    
     //update 
  
-    app.post('/person/update/:name', urlencodeparser, async function(req, res){
+    app.put('/person/update/:name', urlencodeparser, async function(req, res){
     try {
      var name = req.params.name;
      var newBday = moment.utc(req.body.birthday, 'DD-MM-YYYY');
