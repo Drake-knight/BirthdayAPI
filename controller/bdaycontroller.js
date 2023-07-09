@@ -1,6 +1,6 @@
 var bodyparser = require('body-parser');
 var mongoose = require('mongoose');
-
+var moment = require('moment');
 
 mongoose.connect('mongodb+srv://test:test@cluster0.5gdil8c.mongodb.net/?retryWrites=true&w=majority');
 
@@ -20,31 +20,30 @@ module.exports = function(app){
 
     //add
 
-    app.post('/add', urlencodeparser, async function(req, res){
-    try{ 
-     var P = req.body.name;
-     var birthday = req.body.birthday;
-     var Q = new Date(birthday);
-     
-     if(!P || isNaN(Q)) {
-       res.json({error:'Name or Birthday is not valid'});
-     }
-      else{
- 
-         var existingPerson = await BirthDay.findOne({name:P});
-         if(existingPerson){
-          res.json({error:'Person already exists'});
-         }else{
-       var AddBday = new BirthDay({name:P,birthday:Q});
-   
-       AddBday.save();
-       res.json({message:'Birthday Added'});
- 
-    } }}catch(err){
-         res.json({ error: 'Failed to add Birthday' });
-     }
-     }
-     );
+        app.post('/add', urlencodeparser, async function(req, res){
+        try{ 
+        var P = req.body.name;
+        var Q = moment.utc(req.body.birthday, 'DD-MM-YYYY', true);
+        
+        if(!P || !Q.isValid()) {
+        res.json({error:'Name or Birthday is not valid'});
+        }
+        else{
+            var existingPerson = await BirthDay.findOne({name:P});
+            if(existingPerson){
+            res.json({error:'Person already exists'});
+            }else{
+           
+          var AddBday = new BirthDay({name:P,birthday:Q.toDate()});
+    
+        AddBday.save();
+        res.json({message:'Birthday Added'});
+    
+        } }}catch(err){
+            res.json({ error: 'Failed to add Birthday' });
+        }
+        }
+        );
    
  //delete
  
@@ -88,16 +87,22 @@ module.exports = function(app){
     app.put('/person/update/:name', urlencodeparser, async function(req, res){
     try {
      var name = req.params.name;
-     var newBdayStr = req.body.birthday;
-     var newbirthday = new Date(newBdayStr);
+     var newbirthday = moment.utc(req.body.birthday,'DD-MM-YYYY',true);
+
+     if(!newbirthday.isValid()){
+        res.json({
+            error:'Date format is not correct'
+        });
+     }
+     else{
  
-     var updatedBday = await BirthDay.findOneAndUpdate({name:name},{birthday:newbirthday},{new:true});
+     var updatedBday = await BirthDay.findOneAndUpdate({name:name},{birthday:newbirthday.toDate()},{new:true});
      if (!updatedBday) {
        res.json({error:'Person not found'});
      }
       else{
        res.json({message:'Birthday updated'});
-     }
+     }}
     } catch(error){
      res.json({error:'Failed to update birthday'});
     }
@@ -107,10 +112,8 @@ module.exports = function(app){
      app.get('/birthday/nearest',async function(req,res){
      try{
         
-    var today = new Date();
-    today.setUTCHours(0,0,0,0);
-   
- 
+    var today = moment.utc().startOf('day');
+    
     var allbday = await BirthDay.find();
    
     
@@ -118,10 +121,14 @@ module.exports = function(app){
     var mindiff = Infinity;
  
     allbday.forEach(function(bday){
-     var cbday = new Date(bday.birthday);
-     cbday.setFullYear(today.getFullYear());
-    
-     var abdiff = Math.abs(today - cbday);
+     var cbday = moment(bday.birthday);
+     cbday.year(today.year());
+
+     if(cbday.isBefore(today)){
+        cbday.add(1,'year');
+     }
+
+     var abdiff = Math.abs(cbday.diff(today, 'days'));
 
  
      if(abdiff<mindiff){
