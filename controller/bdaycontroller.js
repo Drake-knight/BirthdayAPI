@@ -26,21 +26,25 @@ module.exports = function(app){
         var Q = moment.utc(req.body.birthday, 'DD-MM-YYYY', true);
         
         if(!P || !Q.isValid()) {
-        res.json({error:'Name or Birthday is not valid'});
+          res.set('Content-Type', 'application/json');
+        res.status(400).json({error:'Name or Birthday is not valid'});
         }
         else{
             var existingPerson = await BirthDay.findOne({name:P});
             if(existingPerson){
-            res.json({error:'Person already exists'});
+              res.set('Content-Type', 'application/json');
+            res.status(409).json({error:'Person already exists'});
             }else{
            
           var AddBday = new BirthDay({name:P,birthday:Q.toDate()});
     
         AddBday.save();
-        res.json({message:'Birthday Added'});
+        res.set('Content-Type', 'application/json');
+        res.status(201).json({message:'Birthday Added'});
     
         } }}catch(err){
-            res.json({ error: 'Failed to add Birthday' });
+          res.set('Content-Type', 'application/json');
+            res.status(500).json({ error:'Failed to add Birthday'});
         }
         }
         );
@@ -53,15 +57,18 @@ module.exports = function(app){
  
       let ToDelete= await BirthDay.findOneAndDelete({name: P});
          if(!ToDelete){
-             res.json({error:'Person not found'});
+          res.set('Content-Type', 'application/json');
+             res.status(404).json({error:'Person not found'});
          }
          else{
-             res.json({message: 'Birthday Deleted'});
+          res.set('Content-Type', 'application/json');
+             res.status(200).json({message: 'Birthday Deleted'});
          }
  
      }
     catch(err){
-     res.json({error:'Failed to deleted person'});
+      res.set('Content-Type', 'application/json');
+     res.status(500).json({error:'Failed to deleted person'});
      }});
  
      //specific person
@@ -72,13 +79,16 @@ module.exports = function(app){
        var Person = await BirthDay.findOne({ name: P });
    
        if(!Person){
-         res.json({error:'Person not found'});
+        res.set('Content-Type', 'application/json');
+         res.status(404).json({error:'Person not found'});
        }
         else{
-         res.json({name:Person.name,birthday:Person.birthday});
+          res.set('Content-Type', 'application/json');
+         res.status(200).json({name:Person.name,birthday:Person.birthday});
        }
      } catch(error){
-       res.json({error:'Could not get Birthday'});
+      res.set('Content-Type', 'application/json');
+       res.status(500).json({error:'Could not get Birthday'});
      }
     });
    
@@ -90,21 +100,23 @@ module.exports = function(app){
      var newbirthday = moment.utc(req.body.birthday,'DD-MM-YYYY',true);
 
      if(!newbirthday.isValid()){
-        res.json({
-            error:'Date format is not correct'
-        });
+      res.set('Content-Type', 'application/json');
+        res.status(400).json({error:'Date format is not correct'});
      }
      else{
  
      var updatedBday = await BirthDay.findOneAndUpdate({name:name},{birthday:newbirthday.toDate()},{new:true});
      if (!updatedBday) {
-       res.json({error:'Person not found'});
+      res.set('Content-Type', 'application/json');
+       res.status(404).json({error:'Person not found'});
      }
       else{
-       res.json({message:'Birthday updated'});
+        res.set('Content-Type', 'application/json');
+       res.status(200).json({message:'Birthday updated'});
      }}
     } catch(error){
-     res.json({error:'Failed to update birthday'});
+      res.set('Content-Type', 'application/json');
+     res.status(500).json({error:'Failed to update birthday'});
     }
     });
  
@@ -138,15 +150,18 @@ module.exports = function(app){
     });
  
     if(!closestbday){
-     res.json({error: 'No closest birthday found'});
+      res.set('Content-Type', 'application/json');
+     res.status(404).json({error: 'No closest birthday found'});
     }
     else{
-     res.json({name:closestbday.name,birthday:closestbday.birthday});
+      res.set('Content-Type', 'application/json');
+     res.status(200).json({name:closestbday.name,birthday:closestbday.birthday});
     }
  
     }
     catch(err){
-     res.json({error: 'Could not fetch birthday'});
+      res.set('Content-Type', 'application/json');
+     res.status(500).json({error: 'Could not fetch birthday'});
     }
     });
  
