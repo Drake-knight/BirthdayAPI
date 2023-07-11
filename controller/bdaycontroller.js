@@ -86,7 +86,7 @@ module.exports = function(app){
           res.set('Content-Type', 'application/json');
          res.status(200).json({name:Person.name,birthday:Person.birthday});
        }
-     } catch(error){
+     } catch(err){
       res.set('Content-Type', 'application/json');
        res.status(500).json({error:'Could not get Birthday'});
      }
@@ -114,7 +114,7 @@ module.exports = function(app){
         res.set('Content-Type', 'application/json');
        res.status(200).json({message:'Birthday updated'});
      }}
-    } catch(error){
+    } catch(err){
       res.set('Content-Type', 'application/json');
      res.status(500).json({error:'Failed to update birthday'});
     }
