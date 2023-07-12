@@ -13,7 +13,7 @@ var BdaySchema = mongoose.Schema({
 
 
 var BirthDay = mongoose.model('Birthday',BdaySchema);
-var urlencodeparser = bodyparser.urlencoded({ extended: false });
+var urlencodeparser = bodyparser.urlencoded({ extended:true});
 
 
 module.exports = function(app){
