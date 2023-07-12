@@ -25,9 +25,9 @@ module.exports = function(app){
         var P = req.body.name;
         var Q = moment.utc(req.body.birthday, 'DD-MM-YYYY', true);
         
-        if(!P || !Q.isValid()) {
+        if(!P) {
           res.set('Content-Type', 'application/json');
-        res.status(400).json({error:'Name or Birthday is not valid'});
+        res.status(400).json({error:'No name entered'});
         }
         else{
             var existingPerson = await BirthDay.findOne({name:P});
