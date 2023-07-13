@@ -1,5 +1,5 @@
 const express = require('express');
-const controller = require('../controller/bdaycontroller');
+const controller = require('../controller/birthdaycontroller');
 const PORT = 3000;
 
 var app = express();
