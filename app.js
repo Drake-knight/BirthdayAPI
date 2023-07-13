@@ -1,18 +1,12 @@
-var express = require('express');
-var controller = require('./controller/bdaycontroller');
-
-
-
+const express = require('express');
+const controller = require('./controller/bdaycontroller');
+const PORT = 3000;
 
 var app = express();
 
-
-
-
 controller(app);
 
+app.listen(PORT , () =>{
+    console.log(`Listening to port ${PORT}`);
+});
 
-
-
-app.listen(3000);
-console.log('Listening to port 3000');
