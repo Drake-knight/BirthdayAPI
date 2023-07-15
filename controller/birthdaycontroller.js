@@ -10,16 +10,16 @@ mongoose.connect(process.env.MONGODB_URL);
 const Schema = mongoose.Schema({
   name: {type: String},
   birthday: {type: Date}
-});
+  });
 
 const BirthDay = mongoose.model('Birthday',Schema);
 const urlencodeparser = bodyparser.urlencoded({ extended:true});
 
 
-module.exports = function(app){
+module.exports = (app) => {
 //add
-app.post('/add', urlencodeparser, async function(req, res){
-  try{ 
+app.post('/add', urlencodeparser, async (req, res) => {
+    try{ 
     let name = req.body.name;
     let birthDate = moment.utc(req.body.birthday, 'DD-MM-YYYY', true);
 
@@ -37,22 +37,23 @@ app.post('/add', urlencodeparser, async function(req, res){
     let AddBday = new BirthDay({name:name,birthday:birthDate.toDate()});
     
     await AddBday.save();
+    
     res.setHeader('Content-Type', 'application/json');
     res.status(201).json({message:'Birthday Added'});
     }}}
-  catch(err){
+    catch(err){
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ error:'Failed to add Birthday'});
     }});
    
     //delete
  
-app.delete('/delete/:name',async function(req,res){
-  try{
+app.delete('/delete/:name',async (req,res) => {
+    try{
     let name = req.params.name;
-    let ToDelete= await BirthDay.findOneAndDelete({name:name});
+    let toDelete= await BirthDay.findOneAndDelete({name:name});
 
-    if(!ToDelete){
+    if(!toDelete){
     res.setHeader('Content-Type', 'application/json');
     res.status(404).json({error:'Person not found'});
     }
@@ -60,15 +61,15 @@ app.delete('/delete/:name',async function(req,res){
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({message:'Birthday Deleted'});
     }}
-  catch(err){
+    catch(err){
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({error:'Failed to deleted person'});
     }});
  
      //specific person
  
-app.get('/:name', async function(req, res){
-  try{
+app.get('/:name', async (req, res) => {
+    try{
     let name = req.params.name;
     let person = await BirthDay.findOne({ name: name });
 
@@ -80,15 +81,15 @@ app.get('/:name', async function(req, res){
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(person);
     }}
-  catch(err){
+    catch(err){
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({error:'Could not get Birthday'});
     }});
 
     //update 
  
-app.put('/update/:name', urlencodeparser, async function(req, res){
-  try{
+app.put('/update/:name', urlencodeparser, async (req, res) => {
+    try{
     let name = req.params.name;
     let newBirthday = moment.utc(req.body.birthday,'DD-MM-YYYY',true);
 
@@ -106,20 +107,20 @@ app.put('/update/:name', urlencodeparser, async function(req, res){
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({message:'Birthday updated'});
     }}} 
-  catch(err){
+    catch(err){
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({error:'Failed to update birthday'});
     }});
     
     // closest birthday
 
-app.get('/birthday/nearest',async function(req,res){
-  try{
+app.get('/birthday/nearest',async (req,res) => {
+    try{
     let today = moment.utc().startOf('day');
     let allBirthday = await BirthDay.find();
     let closestBirthday = null;
     let minimunDifference = Infinity;
-    allBirthday.forEach(function(bday){
+    allBirthday.forEach((bday) => {
     let cbday = moment(bday.birthday);
     cbday.year(today.year());
 
@@ -130,7 +131,7 @@ app.get('/birthday/nearest',async function(req,res){
     if(absoluteDifference<minimunDifference){
     minimunDifference = absoluteDifference;
     closestBirthday = bday;
-     }});
+    }});
     if(!closestBirthday){
     res.setHeader('Content-Type', 'application/json');
     res.status(404).json({error: 'No closest birthday found'});
@@ -139,7 +140,7 @@ app.get('/birthday/nearest',async function(req,res){
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(closestBirthday);
     }}
-  catch(err){
+    catch(err){
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({error: 'Could not fetch nearest birthday'});
     }});
